@@ -1,0 +1,41 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SERP_API_KEY=${SERP_API_KEY}
+      - PYTHONPATH=/app
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+      # Exclude __pycache__ for better performance
+      - /app/__pycache__
+    depends_on: []
+    # Add development-specific settings
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    # Add development-specific settings
+    stdin_open: true
+    tty: true
+
+networks:
+  default:
+    driver: bridge
